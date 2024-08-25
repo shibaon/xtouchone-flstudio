@@ -6,6 +6,7 @@ import transport
 import device
 import mixer
 import math
+import patterns
 
 import xtouch_utils
 
@@ -20,11 +21,8 @@ CcIdTempo = 0x5A
 def onInit():
     device.setHasMeters()
 
-evt = False
 
 def OnControlChange(event):
-    global evt
-    evt = event
     event.handled = False
     # print(event.data1)
     if event.data2 >= 0x40:
@@ -48,17 +46,17 @@ def OnControlChange(event):
             ui.jog(1)
             event.handled = True
 
-once = False
-
 def OnUpdateMeters():
     value = mixer.getLastPeakVol(midi.PEAK_LR_INV)
     global meter_value
     meter_value = xtouch_utils.convertToMeterValue(value)
     device.midiOutMsg(0xB0, 0, CcIdTempo, math.ceil(meter_value))
 
-    global once, evt
-
-    if not once and evt:
-        print(evt.sysex)
-        xtouch_utils.sendText(evt, 'green', 'Top', 'Bottom')
-        once = True
+def OnRefresh(evt):
+    pattern_number = patterns.patternNumber()
+    name = patterns.getPatternName(pattern_number)
+    top = name[:7]
+    bottom = name[7:]
+    if bottom[0] == ' ':
+        bottom = name[8:]
+    xtouch_utils.sendText('white', top, bottom)

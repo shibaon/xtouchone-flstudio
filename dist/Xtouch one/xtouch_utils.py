@@ -21,7 +21,7 @@ def setButton(button: int, button_state: int):
     device.midiOutMsg(0xB0, 0, button, button_state)
 
 """ Color: black, red, green, yellow, blue, magenta, cyan, white """
-def sendText(evt, color: str, first_line: str, second_line: str, invert_upper = False, invert_lover = False):
+def sendText(color: str, first_line: str, second_line: str, invert_upper = False, invert_lover = False):
     firstFourBytes = '0000'
     if color == 'red':
         firstFourBytes = '0001'
@@ -43,18 +43,11 @@ def sendText(evt, color: str, first_line: str, second_line: str, invert_upper = 
 
     binary_str = '00' + invert_down_byte + invert_up_byte + firstFourBytes
 
-    print(binary_str)
-
     first_line_hex = first_line.encode('ascii')[:7].ljust(7).hex().zfill(14)
     second_line_hex = second_line.encode('ascii')[:7].ljust(7).hex().zfill(14)
 
-    print(int(binary_str, 2));
-    print('{:x}'.format(int(binary_str, 2)));
-
-    #                40 — X-Touch
+    #                41 — X-Touch
     final = 'f0002032414c00' + '{:x}'.format(int(binary_str, 2)).zfill(2) + first_line_hex + second_line_hex + 'f7'
-
-    print(final);
 
     try:
         result = device.midiOutSysex(bytearray.fromhex(final));
